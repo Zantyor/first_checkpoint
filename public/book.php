@@ -13,14 +13,45 @@
 <?php
 $pdo = new \PDO(DSN, USER, PASS);
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+
+$errors = 0;
+if ($_POST) {
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        if (empty($_POST["name"])) {
+            $nameErr = "name is required";
+            $errors++;
+        }
+
+        if (empty($_POST["payment"]) || $_POST["payment"] === 0) {
+            $paymentErr = "Payment is required and must be superior to 0";
+            $errors++;
+        }
+
+    }
+}
+$name = trim($_POST["name"]);
+$payment = trim($_POST["payment"]);
+$query = "INSERT INTO bribe (name, payment) VALUES(:name, :payment)";
+
+$statement = $pdo->prepare($query);
+
+$statement->bindvalue(':name', $name, \PDO::PARAM_STR);
+
+$statement->bindvalue(':payment', $payment, \PDO::PARAM_INT);
+if ($errors === 0) {
+    $statement->execute();
+}
+
+
 $query = 'SELECT * FROM bribe';
 $statement = $pdo->query($query);
 $bribes = $statement->fetchAll(PDO::FETCH_ASSOC);
-var_dump($bribes);
 $summary = array_column($bribes, 'payment');
 $totalPayment = array_sum($summary);
 
 ?>
+
 <main class="container">
 
     <section class="desktop">
@@ -33,7 +64,29 @@ $totalPayment = array_sum($summary);
             <div class="pages">
                 <div class="page leftpage">
                     Add a bribe
-                    <!-- TODO : Form -->
+                    <?php
+                    if ($errors != 0) {
+                        if (isset($nameErr)) {
+                            echo '<br>' . $nameErr;
+                        }
+                        if (isset($paymentErr)) {
+                            echo '<br>' . $paymentErr;
+                        }
+                    }
+                    ?>
+                    <form method="post" action="book.php">
+                        <div>
+                            <label for="name">Add new name</label>
+                            <input type="text" name="name" id="name">
+                        </div>
+                        <div>
+                            <label for="payment">Add new payment</label>
+                            <input type="number" name="payment" id="payment">
+                        </div>
+                        <div>
+                            <input type="submit">
+                        </div>
+                    </form>
                 </div>
 
                 <div class="page rightpage">
