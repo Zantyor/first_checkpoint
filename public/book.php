@@ -30,19 +30,20 @@ if ($_POST) {
 
     }
 }
-$name = trim($_POST["name"]);
-$payment = trim($_POST["payment"]);
-$query = "INSERT INTO bribe (name, payment) VALUES(:name, :payment)";
+if (isset($_POST["name"]) && isset($_POST["payment"])) {
+    $name = trim($_POST["name"]);
+    $payment = trim($_POST["payment"]);
+    $query = "INSERT INTO bribe (name, payment) VALUES(:name, :payment)";
 
-$statement = $pdo->prepare($query);
+    $statement = $pdo->prepare($query);
 
-$statement->bindvalue(':name', $name, \PDO::PARAM_STR);
+    $statement->bindvalue(':name', $name, \PDO::PARAM_STR);
 
-$statement->bindvalue(':payment', $payment, \PDO::PARAM_INT);
-if ($errors === 0) {
-    $statement->execute();
+    $statement->bindvalue(':payment', $payment, \PDO::PARAM_INT);
+    if ($errors === 0) {
+        $statement->execute();
+    }
 }
-
 
 $query = 'SELECT * FROM bribe';
 $statement = $pdo->query($query);
@@ -84,7 +85,7 @@ $totalPayment = array_sum($summary);
                             <input type="number" name="payment" id="payment">
                         </div>
                         <div>
-                            <input type="submit">
+                            <input type="submit" value="submit">
                         </div>
                     </form>
                 </div>
